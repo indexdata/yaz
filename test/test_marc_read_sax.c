@@ -188,6 +188,41 @@ static void tst_nested_controlfield(void)
     yaz_marc_destroy(mt);
     wrbuf_destroy(data.output);
 }
+
+static void tst_nested_records(void)
+{
+    const char *leader = "00062cgm a2200037Ia 4500";
+    const char *fields = "<datafield tag=\"245\" ind1=\"1\" ind2=\"2\">"
+        "<subfield code=\"a\">title</subfield></datafield>";
+    const char *expected = "<datafield tag=\"245\" ind1=\"1\" ind2=\"2\">";
+    WRBUF xml = wrbuf_alloc();
+
+    /* A record is delivered by its own end tag only, not once more for
+     * every enclosing record element. */
+    wrbuf_printf(xml, "<record><record><record><leader>%s</leader>%s"
+                 "</record></record></record>", leader, fields);
+    check_leaders(wrbuf_cstr(xml), 1, expected);
+
+    /* What follows a delivered record inside an enclosing record does not
+     * deliver the fields of the inner record again. */
+    wrbuf_rewind(xml);
+    wrbuf_printf(xml, "<record><record><record><leader>%s</leader>%s</record>"
+                 "<leader>%s</leader></record>"
+                 "<leader>%s</leader>%s</record>",
+                 leader, fields, leader, leader, fields);
+    check_leaders(wrbuf_cstr(xml), 1, expected);
+
+    /* Records wrapped in another element named record, as in SRU. */
+    wrbuf_rewind(xml);
+    wrbuf_printf(xml, "<records>"
+                 "<record><recordData><record><leader>%s</leader>%s</record>"
+                 "</recordData></record>"
+                 "<record><recordData><record><leader>%s</leader>%s</record>"
+                 "</recordData></record>"
+                 "</records>", leader, fields, leader, fields);
+    check_leaders(wrbuf_cstr(xml), 2, expected);
+    wrbuf_destroy(xml);
+}
 #endif
 
 
@@ -198,6 +233,7 @@ int main(int argc, char **argv)
 #if YAZ_HAVE_XML2
     tst_leader_lengths();
     tst_nested_controlfield();
+    tst_nested_records();
 #endif
     YAZ_CHECK_TERM;
 }

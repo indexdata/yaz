@@ -119,6 +119,10 @@ static void yaz_end_element_ns(void *vp, const xmlChar *localname,
     {
         if (ctx->have_leader && !ctx->invalid_record)
             ctx->cb_func(ctx->mt, ctx->cb_data);
+        /* record complete: ignore content until the next record start,
+           so that the end of an enclosing record does not deliver again */
+        ctx->have_leader = 0;
+        ctx->invalid_record = 1;
         wrbuf_rewind(ctx->cdata);
         return;
     }
