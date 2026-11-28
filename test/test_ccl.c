@@ -476,6 +476,22 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "s2=a b?", 0));
     YAZ_CHECK(tst_ccl_query(bibset, "s2=a b? c", 0));
 
+    /* range with split-list in effect: each bound is a single term */
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist,date=1990-2000",
+                            "@and @attr 2=4 @attr 1=2 1990 "
+                            "@attr 2=2 @attr 1=2 2000 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist,x=1990 - 2000",
+                            "@and @attr 2=4 @attr 1=2 1990 "
+                            "@attr 2=2 @attr 1=2 2000 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist,date=1990-",
+                            "@attr 2=4 @attr 1=2 1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist,date=-2000",
+                            "@attr 2=2 @attr 1=2 2000 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=(date=1990-2000", 0));
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=(date=1990-2000)",
+                            "@and @attr 2=4 @attr 1=2 1990 "
+                            "@attr 2=2 @attr 1=2 2000 "));
+
     YAZ_CHECK(tst_ccl_query(bibset, "z=(ti=b)", "@attr 4=2 @attr 1=4 b "));
     YAZ_CHECK(tst_ccl_query(bibset, "z=(ti=b?)",
                             "@attr 5=1 @attr 4=2 @attr 1=4 b "));

@@ -54,6 +54,10 @@ typedef struct yaz_marc_sax_t_ *yaz_marc_sax_t;
     A record must have a 24-byte leader before its fields. Records with
     missing or incorrectly sized leaders, or fields before the leader,
     are skipped without calling cb. Parsing continues with the next record.
+    A record ends at the first record end tag; cb is called at most once
+    per record start tag. Content between that end tag and the next record
+    start tag, such as the remainder of an enclosing record element, is
+    ignored.
     This handler does not perform full MARCXML schema validation.
   */
 YAZ_EXPORT yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt,

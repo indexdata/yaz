@@ -67,6 +67,7 @@ static int fetch(void *handle, bend_fetch_rr *rr)
 static int explain(void *handle, bend_explain_rr *rr)
 {
     explained++;
+    rr->explain_buf = "<explain>test-explain</explain>";
     return 0;
 }
 
@@ -80,6 +81,9 @@ static bend_initresult *init(bend_initrequest *rr)
     rr->bend_present = present;
     rr->bend_fetch = fetch;
     rr->bend_explain = explain;
+    /* Refuse only after registering the handlers. */
+    if (reject_login == 2)
+        return 0;
     return &result;
 }
 
@@ -409,6 +413,54 @@ static void check_pipeline(int mode)
     odr_destroy(enc);
 }
 
+/* A session refused by bend_init must not reach the explain handler. */
+static void check_explain(int refuse)
+{
+    struct comstack cs;
+    IOCHAN chan = iochan_create(-1, ir_session, EVENT_INPUT, 0);
+    WRBUF text = wrbuf_alloc();
+    association *assoc;
+    request *response;
+
+    explained = 0;
+    reject_login = refuse;
+    memset(&cs, 0, sizeof(cs));
+    cs.protocol = PROTO_HTTP;
+    cs.f_get = get;
+    cs.f_more = more;
+    cs.f_addrstr = addrstr;
+    cs.user = "GET /Default?version=1.1&operation=explain HTTP/1.1\r\n"
+        "Host: localhost\r\n\r\n";
+    assoc = create_association(chan, &cs, 0);
+    iochan_setdata(chan, assoc);
+    assoc->cs_get_mask = EVENT_INPUT;
+    ir_session(chan, EVENT_INPUT);
+    reject_login = 0;
+    YAZ_CHECK_EQ(explained, refuse ? 0 : 1);
+    if (refuse)
+        YAZ_CHECK_EQ(assoc->state, ASSOC_DEAD);
+    response = request_head(&assoc->outgoing);
+    YAZ_CHECK(response != 0);
+    if (response)
+    {
+        wrbuf_write(text, response->response, response->len_response);
+        YAZ_CHECK(strstr(wrbuf_cstr(text), "HTTP/1.1 200") != 0);
+        if (refuse)
+        {
+            YAZ_CHECK(strstr(wrbuf_cstr(text), "info:srw/diagnostic/1/3") != 0);
+            YAZ_CHECK(strstr(wrbuf_cstr(text), "test-explain") == 0);
+        }
+        else
+        {
+            YAZ_CHECK(strstr(wrbuf_cstr(text), "info:srw/diagnostic/") == 0);
+            YAZ_CHECK(strstr(wrbuf_cstr(text), "test-explain") != 0);
+        }
+    }
+    destroy_association(assoc);
+    xfree(chan);
+    wrbuf_destroy(text);
+}
+
 static void check(int mode, const char *maximum, const char *start,
                   Odr_int hit_count, int count, int diagnostic)
 {
@@ -671,6 +723,9 @@ int main(int argc, char **argv)
         statserv_getcontrol()->bend_init = init;
         for (mode = 0; mode < 5; mode++)
             check_pipeline(mode);
+        /* Accepted session, initialization error, and NULL result. */
+        for (mode = 0; mode < 3; mode++)
+            check_explain(mode);
         for (mode = 0; mode < 3; mode++)
         {
             check_unknown_host("1.1", 0, 1, mode);

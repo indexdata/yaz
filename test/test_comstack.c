@@ -546,6 +546,13 @@ static void tst_cs_get_host_args(void)
     YAZ_CHECK(arg && !strcmp(arg, "x"));
     cs_get_host_args("http:///x", &arg);
     YAZ_CHECK(arg && !strcmp(arg, "x"));
+    /* The proxy part of connect:proxy,target supplies no arguments. */
+    cs_get_host_args("connect:proxy:8080,localhost:9999/x", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, "x"));
+    cs_get_host_args("connect:user:pass/word@proxy:8080,http://y/x", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, "x"));
+    cs_get_host_args("connect:user:pass/word@proxy:8080,localhost:9999", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, ""));
 }
 
 static void tst_cs_get_error_tcp(void)

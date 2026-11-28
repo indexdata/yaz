@@ -14,7 +14,7 @@ check_PROGRAMS = test_client_record test_ccl test_charneg test_comstack test_cql
  test_shared_ptr test_soap1 test_soap2 test_solr test_sortspec test_sru_limits \
  test_timing test_tpath test_url test_wrbuf \
  test_xmalloc test_xml_include test_xmlquery test_zgdu \
- test_gfs_requests test_gfs_vhosts test_marc_read_iso2709 test_marc_read_sax \
+ test_gfs_log test_gfs_requests test_gfs_vhosts test_marc_read_iso2709 test_marc_read_sax \
  test_present_limits test_requestq test_sru_update test_zoom_facet test_zoom_record \
  test_zoom_record_cache test_zoom_scan test_zoom_send
 
@@ -133,6 +133,9 @@ test_sru_update_SOURCES = test_sru_update.c
 test_sru_update_LDADD = ../src/libyaz_server.la ../src/libyaz.la
 
 test_marc_read_iso2709_SOURCES = test_marc_read_iso2709.c
+
+test_gfs_log_SOURCES = test_gfs_log.c
+test_gfs_log_LDADD = ../src/libyaz_server.la ../src/libyaz.la
 
 # Keep HTTP handling with the statserv.c embedded by the test. Shared
 # libraries on macOS bind their internal calls to their own server state.

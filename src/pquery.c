@@ -78,7 +78,9 @@ static int query_token(struct yaz_pqf_parser *li)
     }
     li->lex_buf = *qptr;
 
-    if (**qptr == li->escape_char && yaz_isdigit((*qptr)[1]))
+    /* @1=4 is short for @attr 1=4, but not within a quoted term */
+    if (sep_char == ' ' &&
+        **qptr == li->escape_char && yaz_isdigit((*qptr)[1]))
     {
         ++(li->lex_len);
         ++(*qptr);

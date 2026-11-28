@@ -708,10 +708,12 @@ static struct ccl_rpn_node *search_term_split_list(CCL_parser cclp,
         cclp->error_code = CCL_ERR_TERM_EXPECTED;
         return 0;
     }
+    if (!multi)
+        sz = 1;      /* single term only, like search_term_x */
     struct ccl_token **ar =
         (struct ccl_token **) xmalloc(sizeof(*lookahead) * sz);
     lookahead = cclp->look_token;
-    for (i = 0; is_term_ok(lookahead->kind, term_list); i++)
+    for (i = 0; i < sz; i++)
     {
         ar[i] = lookahead;
         lookahead = lookahead->next;

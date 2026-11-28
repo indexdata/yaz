@@ -10,6 +10,7 @@
 #include <string.h>
 #include <yaz/test.h>
 #include <yaz/marcdisp.h>
+#include <yaz/json.h>
 #include <yaz/wrbuf.h>
 #include <yaz/xmalloc.h>
 
@@ -270,6 +271,53 @@ static void tst_xml_comment(void)
     yaz_marc_destroy(mt);
 }
 
+/* The ISO2709 writer writes no field or record terminators but its own. */
+static void tst_write_terminators(void)
+{
+    yaz_marc_t mt = yaz_marc_create();
+    yaz_iconv_t cd = yaz_iconv_open("UTF-8", "MARC-8");
+    /* MARC-8 0x9D and 0x9E are 0x1D and 0x1E when ASCII is the G1 set */
+    const char marc8[] = "  \037ak\033)B\235\236b\235\036";
+    const char expect1[] = "00048nam a2200037   4500" "245001000000\036"
+        "  \037ak  b \036\035";
+    const char *json = "{\"leader\":\"00000nam a2200000 a 4500\",\"fields\":"
+        "[{\"2\\u001e\\u001d\":{\"ind1\":\"\\u001d\",\"ind2\":\"0\","
+        "\"subfields\":[{\"a\":\"x\\u001dy\"}]}}]}";
+    const char expect2[] = "00046nam a2200037 a 4500" "2  000800000\036"
+        " 0\037ax y\036\035";
+    struct json_node *n = json_parse(json, 0);
+    WRBUF w = wrbuf_alloc();
+    const char *result;
+    size_t result_len;
+    char *buf;
+    int len;
+
+    yaz_marc_xml(mt, YAZ_MARC_ISO2709);
+
+    YAZ_CHECK(cd != 0);
+    yaz_marc_iconv(mt, cd);
+    buf = record("245", marc8, sizeof(marc8) - 1, &len);
+    YAZ_CHECK_EQ(yaz_marc_decode_buf(mt, buf, len, &result, &result_len), len);
+    YAZ_CHECK_EQ(result_len, sizeof(expect1) - 1);
+    YAZ_CHECK(result_len == sizeof(expect1) - 1 &&
+              !memcmp(result, expect1, result_len));
+    xfree(buf);
+    yaz_marc_iconv(mt, 0);
+    if (cd)
+        yaz_iconv_close(cd);
+
+    YAZ_CHECK(n != 0);
+    yaz_marc_reset(mt);
+    YAZ_CHECK_EQ(yaz_marc_read_json_node(mt, n), 0);
+    YAZ_CHECK_EQ(yaz_marc_write_mode(mt, w), 0);
+    YAZ_CHECK_EQ(wrbuf_len(w), sizeof(expect2) - 1);
+    YAZ_CHECK(wrbuf_len(w) == sizeof(expect2) - 1 &&
+              !memcmp(wrbuf_buf(w), expect2, wrbuf_len(w)));
+    json_remove_node(n);
+    wrbuf_destroy(w);
+    yaz_marc_destroy(mt);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -278,5 +326,6 @@ int main(int argc, char **argv)
     tst_write_bounds();
     tst_overlap();
     tst_xml_comment();
+    tst_write_terminators();
     YAZ_CHECK_TERM;
 }

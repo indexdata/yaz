@@ -1170,6 +1170,18 @@ static size_t pow10i(int n)
     return res;
 }
 
+/* Blank field and record terminators in wr from offset pos on. Content
+   read from ISO2709 has none, but character set conversion may produce
+   them (MARC-8 0x9D/0x9E with ASCII as G1, danMARC @001D) and so may
+   other readers (JSON). Same length, so the directory is unaffected. */
+static void iso2709_blank_terminators(WRBUF wr, size_t pos)
+{
+    char *buf = wrbuf_buf(wr);
+    for (; pos < wrbuf_len(wr); pos++)
+        if (buf[pos] == ISO2709_FS || buf[pos] == ISO2709_RS)
+            buf[pos] = ' ';
+}
+
 int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
 {
     struct yaz_marc_node *n, *cap_node = 0;
@@ -1254,6 +1266,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
                 return -1;
             }
             wrbuf_printf(wr_dir, "%3.3s", tag);
+            iso2709_blank_terminators(wr_dir, wrbuf_len(wr_dir) - 3);
             wrbuf_printf(wr_dir, "%0*ld", length_data_entry, (long) data_length);
             wrbuf_printf(wr_dir, "%0*ld", length_starting, (long) data_offset);
             data_offset += data_length;
@@ -1291,6 +1304,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     for (n = mt->nodes; n != cap_node; n = n->next)
     {
         struct yaz_marc_subfield *s;
+        size_t pos = wrbuf_len(wr);
 
         switch(n->which)
         {
@@ -1302,11 +1316,13 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
                 wrbuf_iconv_puts(wr, mt->iconv_cd, s->code_data);
                 marc_iconv_reset(mt, wr);
             }
+            iso2709_blank_terminators(wr, pos);
             wrbuf_putc(wr, ISO2709_FS);
             break;
         case YAZ_MARC_CONTROLFIELD:
             wrbuf_iconv_puts(wr, mt->iconv_cd, n->u.controlfield.data);
             marc_iconv_reset(mt, wr);
+            iso2709_blank_terminators(wr, pos);
             wrbuf_putc(wr, ISO2709_FS);
             break;
         case YAZ_MARC_COMMENT:

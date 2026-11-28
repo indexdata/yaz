@@ -355,12 +355,10 @@ static size_t yaz_write_marc8_generic(yaz_iconv_t cd, struct encoder_data *w,
     unsigned long x1, x2;
     if (yaz_iso_8859_1_lookup_y(x, &x1, &x2))
     {
-        /* save the output pointers .. */
+        /* save the output pointers and encoder state .. */
         char *outbuf0 = *outbuf;
         size_t outbytesleft0 = *outbytesleft;
-        unsigned long last_ch = w->write_marc8_last;
-        int ncr = w->write_marc8_ncr;
-        const char *lpage = w->write_marc8_lpage;
+        struct encoder_data w0 = *w;
 
         size_t r =
             yaz_write_marc8_2(cd, w, x1, outbuf, outbytesleft, loss_mode);
@@ -370,12 +368,11 @@ static size_t yaz_write_marc8_generic(yaz_iconv_t cd, struct encoder_data *w,
                               outbuf, outbytesleft, loss_mode);
         if (r && yaz_iconv_error(cd) == YAZ_ICONV_E2BIG)
         {
-            /* not enough room. reset output to original values */
+            /* not enough room. reset output and encoder state to original
+               values (G0/G1 too, as their escapes are taken back) */
             *outbuf = outbuf0;
             *outbytesleft = outbytesleft0;
-            w->write_marc8_last = last_ch;
-            w->write_marc8_ncr = ncr;
-            w->write_marc8_lpage = lpage;
+            *w = w0;
         }
         return r;
     }

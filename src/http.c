@@ -223,6 +223,34 @@ Z_GDU *z_get_HTTP_Request(ODR o)
 }
 
 
+/* Locate the host where cs_parse_host does, so that Host names what the
+   transport connects to: http: and https: need no slashes, and *uri is
+   advanced past a connect:[user:password@]proxy, wrapper. The wrapper is
+   for the transport only and must not appear in any request. */
+static const char *http_host_start(const char **uri)
+{
+    const char *cp;
+
+    if (!strncmp(*uri, "connect:", 8))
+    {
+        cp = strchr(*uri, ',');
+        if (cp)
+            *uri = cp + 1;
+    }
+    if (!strncmp(*uri, "http:", 5))
+        cp = *uri + 5;
+    else if (!strncmp(*uri, "https:", 6))
+        cp = *uri + 6;
+    else
+    {
+        cp = strstr(*uri, "://");
+        return cp ? cp + 3 : *uri;
+    }
+    while (*cp == '/')
+        cp++;
+    return cp;
+}
+
 Z_GDU *z_get_HTTP_Request_host_path(ODR odr,
                                     const char *host,
                                     const char *path)
@@ -233,12 +261,8 @@ Z_GDU *z_get_HTTP_Request_host_path(ODR odr,
 
     if (host)
     {
-        const char *cp0 = strstr(host, "://");
+        const char *cp0 = http_host_start(&host);
         const char *cp1 = 0;
-        if (cp0)
-            cp0 = cp0+3;
-        else
-            cp0 = host;
 
         cp1 = strchr(cp0, '/');
         if (!cp1)
@@ -257,12 +281,8 @@ Z_GDU *z_get_HTTP_Request_uri(ODR odr, const char *uri, const char *args,
                               int use_full_uri)
 {
     Z_GDU *p = z_get_HTTP_Request(odr);
-    const char *cp0 = strstr(uri, "://");
+    const char *cp0 = http_host_start(&uri);
     const char *cp1 = 0;
-    if (cp0)
-        cp0 = cp0+3;
-    else
-        cp0 = uri;
 
     cp1 = strchr(cp0, '/');
     if (!cp1)

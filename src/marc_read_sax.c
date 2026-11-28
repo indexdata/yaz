@@ -119,6 +119,10 @@ static void yaz_end_element_ns(void *vp, const xmlChar *localname,
     {
         if (ctx->have_leader && !ctx->invalid_record)
             ctx->cb_func(ctx->mt, ctx->cb_data);
+        /* record complete: ignore content until the next record start,
+           so that the end of an enclosing record does not deliver again */
+        ctx->have_leader = 0;
+        ctx->invalid_record = 1;
         wrbuf_rewind(ctx->cdata);
         return;
     }
@@ -149,6 +153,9 @@ static void yaz_end_element_ns(void *vp, const xmlChar *localname,
     {
         yaz_marc_add_controlfield(ctx->mt, wrbuf_cstr(ctx->tag),
                                   wrbuf_buf(ctx->cdata), wrbuf_len(ctx->cdata));
+        /* tag belongs to this element only; an enclosing controlfield
+           must not add it again */
+        wrbuf_rewind(ctx->tag);
     }
     else if (strcmp((const char *)localname, "subfield") == 0)
     {

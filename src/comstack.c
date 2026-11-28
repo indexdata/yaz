@@ -58,7 +58,14 @@ int cs_get_error(COMSTACK cs, const char **details)
 void cs_get_host_args(const char *type_and_host, const char **args)
 {
     *args = "";
-    if (!strncmp(type_and_host, "unix:", 5))
+    if (!strncmp(type_and_host, "connect:", 8))
+    {
+        /* As in cs_parse_host, the proxy part is not part of the target. */
+        const char *cp = strchr(type_and_host, ',');
+        if (cp)
+            type_and_host = cp + 1;
+    }
+    else if (!strncmp(type_and_host, "unix:", 5))
     {
         const char *cp = strchr(type_and_host + 5, ':');
         if (!cp)

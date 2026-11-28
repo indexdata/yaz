@@ -117,6 +117,46 @@ static void tst_request_validation(void)
     }
 }
 
+static void tst_request_host(void)
+{
+    /* Host and path must match what the transport (cs_parse_host) uses.
+       The connect: wrapper, with its credentials, is for the proxy only. */
+    static const char *uris[] = {
+        "example.org:8080/db",
+        "http://example.org:8080/db",
+        "https://example.org:8080/db",
+        "http:example.org:8080/db",
+        "https:example.org:8080/db",
+        "http:example.org:8080/db?url=http://other.example/x",
+        "connect:proxy.example:3128,http://example.org:8080/db",
+        "connect:user:secret@proxy.example:3128,example.org:8080/db",
+        "connect:user:secret@proxy.example:3128,http:example.org:8080/db",
+        "connect:user:secret@proxy.example:3128,https:example.org:8080/db",
+        "connect:user:se://cr/et@proxy.example:3128,http://example.org:8080/db"
+    };
+    size_t i;
+    for (i = 0; i < sizeof(uris) / sizeof(*uris); i++)
+    {
+        int full;
+        for (full = 0; full <= 1; full++)
+        {
+            ODR odr = odr_createmem(ODR_ENCODE);
+            Z_GDU *gdu = z_get_HTTP_Request_uri(odr, uris[i], 0, full);
+            Z_HTTP_Request *req = gdu->u.HTTP_Request;
+            const char *host = z_HTTP_header_lookup(req->headers, "Host");
+            YAZ_CHECK(host && !strcmp(host, "example.org:8080"));
+            if (!full)
+                YAZ_CHECK(!strncmp(req->path, "/db", 3));
+            YAZ_CHECK(!strstr(req->path, "proxy.example"));
+            odr_reset(odr);
+            gdu = z_get_HTTP_Request_host_path(odr, uris[i], "/other");
+            host = z_HTTP_header_lookup(gdu->u.HTTP_Request->headers, "Host");
+            YAZ_CHECK(host && !strcmp(host, "example.org:8080"));
+            odr_destroy(odr);
+        }
+    }
+}
+
 static void tst_cookies(void)
 {
     ODR odr = odr_createmem(ODR_ENCODE);
@@ -714,6 +754,7 @@ int main (int argc, char **argv)
     YAZ_CHECK_LOG();
     tst_http_framing();
     tst_request_validation();
+    tst_request_host();
     tst_cookies();
     tst_http_same_origin();
     tst_http_redirect();

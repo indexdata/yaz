@@ -56,6 +56,7 @@ TEST_PROGRAMS = \
     $(BINDIR)\test_xml_include.exe \
     $(BINDIR)\test_xmlquery.exe \
     $(BINDIR)\test_zgdu.exe \
+    $(BINDIR)\test_gfs_log.exe \
     $(BINDIR)\test_gfs_vhosts.exe \
     $(BINDIR)\test_marc_read_iso2709.exe \
     $(BINDIR)\test_marc_read_sax.exe \
