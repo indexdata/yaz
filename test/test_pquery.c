@@ -76,6 +76,14 @@ static void tst(void)
                          YAZ_PQF_ERROR_PROXIMITY));
     YAZ_CHECK(expect_pqf("@attr 1=12345678901 x", "@attrset Bib-1 @attr 1=12345678901 x", YAZ_PQF_ERROR_NONE));
     YAZ_CHECK(expect_pqf("@attr 1=1234567890.1 x", "@attrset Bib-1 @attr 1=1234567890.1 x", YAZ_PQF_ERROR_NONE));
+    YAZ_CHECK(expect_pqf("@1=4 a", "@attrset Bib-1 @attr 1=4 a", YAZ_PQF_ERROR_NONE));
+    /* quoted term is a term, even if it looks like attribute short form */
+    YAZ_CHECK(expect_pqf("\"@1=4\"", "@attrset Bib-1 \\@1=4", YAZ_PQF_ERROR_NONE));
+    YAZ_CHECK(expect_pqf("{@1=4}", "@attrset Bib-1 \\@1=4", YAZ_PQF_ERROR_NONE));
+    YAZ_CHECK(expect_pqf("\"@1=4 a @and b\"", "@attrset Bib-1 \"@1=4 a @and b\"", YAZ_PQF_ERROR_NONE));
+    YAZ_CHECK(expect_pqf("@not @attr 1=4 \"@1=4 a @and b\" @attr 1=1018 c",
+                         "@attrset Bib-1 @not @attr 1=4 \"@1=4 a @and b\" @attr 1=1018 c",
+                         YAZ_PQF_ERROR_NONE));
 }
 
 static void tst_term_create(void)
